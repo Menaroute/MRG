@@ -40,23 +40,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-60 border-r border-border/40 bg-sidebar flex flex-col shadow-sm">
+      <aside className="w-60 border-r border-border/40 bg-sidebar flex flex-col">
         <div className="p-5 border-b border-border/40">
-          <img src={logo} alt="Infomineo" className="h-8 mb-4" />
-          <div className="flex items-center gap-2 mt-3">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-sm font-semibold">
-              {currentUser?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground leading-none">{currentUser?.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {isAdmin ? 'Administrateur' : 'Utilisateur'}
-              </p>
-            </div>
-          </div>
+          <img src={logo} alt="Infomineo" className="h-7 mb-6" />
         </div>
         
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -65,14 +54,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 key={item.path}
                 variant="ghost"
                 className={cn(
-                  'w-full justify-start h-9 px-3 font-normal',
+                  'w-full justify-start h-9 px-3 font-normal text-sm rounded-lg',
                   isActive 
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
-                    : 'hover:bg-sidebar-accent/50'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                 )}
                 onClick={() => navigate(item.path)}
               >
-                <Icon className="mr-2.5 h-4 w-4" />
+                <Icon className="mr-3 h-4 w-4" />
                 {item.label}
               </Button>
             );
@@ -80,19 +69,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         <div className="p-3 border-t border-border/40">
+          <div className="flex items-center gap-2 px-3 py-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
+              {currentUser?.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground leading-none truncate">{currentUser?.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isAdmin ? 'Admin' : 'User'}
+              </p>
+            </div>
+          </div>
           <Button
             variant="ghost"
-            className="w-full justify-start h-9 px-3 font-normal text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+            className="w-full justify-start h-9 px-3 font-normal text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg"
             onClick={handleLogout}
           >
-            <LogOut className="mr-2.5 h-4 w-4" />
+            <LogOut className="mr-3 h-4 w-4" />
             Déconnexion
           </Button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto bg-background">
+      <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
           {children}
         </div>

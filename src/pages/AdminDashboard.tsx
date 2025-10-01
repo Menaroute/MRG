@@ -49,10 +49,10 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard title="Total Clients" value={totalClients} icon={Briefcase} />
-          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} />
-          <StatsCard title="En cours" value={inProgressClients} icon={Clock} />
-          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} />
+          <StatsCard title="Total Clients" value={totalClients} icon={Briefcase} change={2.5} color="muted-foreground" />
+          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} color="success" />
+          <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} color="warning" />
+          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} color="destructive" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
