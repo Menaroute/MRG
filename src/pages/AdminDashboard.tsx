@@ -62,7 +62,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
+                <PieChart style={{ fontFamily: 'Inter, sans-serif' }}>
                   <Pie
                     data={statusData}
                     cx="50%"
@@ -72,12 +72,21 @@ export default function AdminDashboard() {
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
+                    strokeWidth={0}
                   >
                     {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ 
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                      border: '1px solid hsl(214, 32%, 91%)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }} 
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -89,15 +98,36 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={userWorkload}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="done" name="Terminés" fill="hsl(142, 76%, 36%)" />
-                  <Bar dataKey="inProgress" name="En cours" fill="hsl(38, 92%, 50%)" />
-                  <Bar dataKey="total" name="Total" fill="hsl(262, 83%, 58%)" />
+                <BarChart data={userWorkload} style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 13 }}
+                    axisLine={{ stroke: 'hsl(214, 32%, 91%)' }}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 13 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                      border: '1px solid hsl(214, 32%, 91%)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}
+                    cursor={{ fill: 'hsl(214, 32%, 96%)' }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '13px', fontFamily: 'Inter, sans-serif' }}
+                    iconType="circle"
+                  />
+                  <Bar dataKey="done" name="Terminés" fill="hsl(142, 76%, 36%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="inProgress" name="En cours" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="total" name="Total" fill="hsl(221, 83%, 53%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

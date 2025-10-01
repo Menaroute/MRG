@@ -14,20 +14,20 @@ export default function StatsCard({ title, value, icon: Icon, change, color = 'm
   const isNegative = change && change < 0;
   
   return (
-    <Card className="hover:shadow-sm transition-all border-border/40">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <Icon className={`h-5 w-5 text-${color}`} />
+    <Card className="hover:border-border transition-all">
+      <CardContent className="p-5">
+        <div className="flex items-center gap-3 mb-3">
+          <Icon className={`h-4 w-4 text-${color}`} />
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl font-semibold">{value.toLocaleString()}</p>
           {change !== undefined && (
             <div className={`flex items-center gap-1 text-xs font-medium ${isPositive ? 'text-success' : isNegative ? 'text-destructive' : 'text-muted-foreground'}`}>
               {isPositive ? <TrendingUp className="h-3 w-3" /> : isNegative ? <TrendingDown className="h-3 w-3" /> : null}
-              {Math.abs(change)}%
+              {isPositive ? '+' : ''}{change}%
             </div>
           )}
-        </div>
-        <div>
-          <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
-          <p className="text-3xl font-semibold tracking-tight">{value.toLocaleString()}</p>
         </div>
       </CardContent>
     </Card>

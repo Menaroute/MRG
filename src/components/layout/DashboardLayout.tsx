@@ -28,28 +28,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navItems = isAdmin
     ? [
-        {
-          category: 'PRINCIPAL',
-          items: [
-            { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-          ]
-        },
-        {
-          category: 'GESTION',
-          items: [
-            { path: '/users', icon: Users, label: 'Utilisateurs' },
-            { path: '/clients', icon: Briefcase, label: 'Clients' },
-          ]
-        }
+        { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+        { path: '/users', icon: Users, label: 'Utilisateurs' },
+        { path: '/clients', icon: Briefcase, label: 'Clients' },
       ]
     : [
-        {
-          category: 'PRINCIPAL',
-          items: [
-            { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-            { path: '/my-work', icon: ClipboardList, label: 'Mon travail' },
-          ]
-        }
+        { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+        { path: '/my-work', icon: ClipboardList, label: 'Mon travail' },
       ];
 
   return (
@@ -60,34 +45,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <img src={logo} alt="Infomineo" className="h-7" />
         </div>
         
-        <nav className="flex-1 p-4 space-y-6">
-          {navItems.map((section, idx) => (
-            <div key={idx} className="space-y-1">
-              <p className="px-3 text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
-                {section.category}
-              </p>
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Button
-                    key={item.path}
-                    variant="ghost"
-                    className={cn(
-                      'w-full justify-start h-9 px-3 font-normal text-sm rounded-md',
-                      isActive 
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
-                        : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
-                    )}
-                    onClick={() => navigate(item.path)}
-                  >
-                    <Icon className="mr-3 h-4 w-4" />
-                    {item.label}
-                  </Button>
-                );
-              })}
-            </div>
-          ))}
+        <nav className="flex-1 p-4 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                className={cn(
+                  'w-full justify-start h-9 px-3 font-normal text-sm rounded-md',
+                  isActive 
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
+                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
+                )}
+                onClick={() => navigate(item.path)}
+              >
+                <Icon className="mr-3 h-4 w-4" />
+                {item.label}
+              </Button>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-border/20">

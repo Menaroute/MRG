@@ -51,7 +51,7 @@ export default function UserDashboard() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
+                <PieChart style={{ fontFamily: 'Inter, sans-serif' }}>
                   <Pie
                     data={statusData}
                     cx="50%"
@@ -61,13 +61,25 @@ export default function UserDashboard() {
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
+                    strokeWidth={0}
                   >
                     {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip 
+                    contentStyle={{ 
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                      border: '1px solid hsl(214, 32%, 91%)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }} 
+                  />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '13px', fontFamily: 'Inter, sans-serif' }}
+                    iconType="circle"
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
