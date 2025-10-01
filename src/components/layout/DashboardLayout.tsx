@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 key={item.path}
                 variant="ghost"
                 className={cn(
-                  'w-full h-9 px-3 font-normal text-sm rounded-lg transition-all',
+                  'w-full h-9 px-3 font-normal text-sm rounded-lg transition-all hover:bg-transparent',
                   sidebarCollapsed ? 'justify-center' : 'justify-start',
                   isActive 
                     ? 'bg-background text-foreground font-medium shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] border border-border/50' 
