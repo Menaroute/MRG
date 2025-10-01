@@ -11,6 +11,14 @@ import {
   Menu,
   ChevronRight,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import {
   Breadcrumb,
@@ -94,42 +102,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             );
           })}
         </nav>
-
-        <div className="p-4 border-t">
-          {sidebarCollapsed ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              className="w-full h-9"
-              title="Déconnexion"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 px-3 py-2">
-                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                  {currentUser?.name?.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground leading-none truncate">{currentUser?.name}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isAdmin ? 'Admin' : 'User'}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                className="w-full justify-start h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4 mr-3" />
-                Déconnexion
-              </Button>
-            </div>
-          )}
-        </div>
       </aside>
 
       {/* Main content area */}
@@ -169,6 +141,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               )}
             </BreadcrumbList>
           </Breadcrumb>
+
+          <div className="ml-auto flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 h-9">
+                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
+                    {currentUser?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium leading-none">{currentUser?.name}</span>
+                    <span className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'User'}</span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Déconnexion</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
         {/* Main content */}
