@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   'w-full justify-start h-9 px-3 font-normal text-sm rounded-lg transition-all',
                   isActive 
                     ? 'bg-background text-foreground font-medium shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] border border-border/50' 
-                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground border border-transparent'
+                    : 'text-muted-foreground hover:text-foreground border border-transparent'
                 )}
                 onClick={() => navigate(item.path)}
               >
