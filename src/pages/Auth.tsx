@@ -14,15 +14,27 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
+    // Check if user is already logged in
+    if (user && !isPasswordReset) {
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+
+    // Check if this is a password reset callback
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery') {
+      setIsPasswordReset(true);
+    }
+  }, [user, navigate, isPasswordReset]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,20 +84,108 @@ export default function Auth() {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: 'Les mots de passe ne correspondent pas'
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: 'Le mot de passe doit contenir au moins 6 caractères'
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Succès',
+        description: 'Votre mot de passe a été modifié avec succès'
+      });
+
+      // Clear the hash from URL
+      window.location.hash = '';
+      setIsPasswordReset(false);
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: error.message || 'Erreur lors de la modification du mot de passe'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>{forgotPassword ? 'Mot de passe oublié' : 'Bienvenue'}</CardTitle>
+          <CardTitle>
+            {isPasswordReset 
+              ? 'Nouveau mot de passe' 
+              : forgotPassword 
+              ? 'Mot de passe oublié' 
+              : 'Bienvenue'}
+          </CardTitle>
           <CardDescription>
-            {forgotPassword 
+            {isPasswordReset
+              ? 'Entrez votre nouveau mot de passe'
+              : forgotPassword 
               ? 'Entrez votre email pour recevoir un lien de réinitialisation' 
               : 'Connectez-vous à votre compte'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {forgotPassword ? (
+          {isPasswordReset ? (
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Minimum 6 caractères"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Répétez le mot de passe"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Modification...' : 'Modifier le mot de passe'}
+              </Button>
+            </form>
+          ) : forgotPassword ? (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="reset-email">Email</Label>
