@@ -17,7 +17,7 @@ export default function StatsCard({ title, value, icon: Icon, change, color = 'm
     <Card className="hover:border-border transition-all">
       <CardContent className="p-5">
         <div className="flex items-center gap-3 mb-3">
-          <Icon className={`h-4 w-4 text-${color}`} />
+          <Icon className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
         </div>
         <div className="flex items-baseline gap-2">
