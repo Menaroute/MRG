@@ -42,7 +42,7 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
   const status = watch('status');
   const assigned_user_id = watch('assigned_user_id');
 
-  const regularUsers = profiles.filter((u) => u.role === 'user');
+  const regularUsers = profiles.filter((u) => u.role === 'user' || u.role === 'admin');
 
   useEffect(() => {
     if (client) {
@@ -120,11 +120,17 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
                 <SelectValue placeholder="Sélectionner un utilisateur" />
               </SelectTrigger>
               <SelectContent>
-                {regularUsers.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
+                {regularUsers.length > 0 ? (
+                  regularUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>
+                    Aucun utilisateur disponible
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
           </div>
