@@ -26,13 +26,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!mounted) return;
+        
         setSession(session);
+        
         if (session?.user) {
           // Defer Supabase calls to avoid deadlock
           setTimeout(async () => {
+            if (!mounted) return;
+            
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('name')
+                .eq('id', session.user.id)
+                .single();
+              
+              const { data: roleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id)
+                .single();
+
+              if (mounted) {
+                setUser({
+                  ...session.user,
+                  name: profile?.name,
+                  role: roleData?.role as 'admin' | 'user'
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching user data:', error);
+            } finally {
+              if (mounted) {
+                setLoading(false);
+              }
+            }
+          }, 0);
+        } else {
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
+      setSession(session);
+      
+      if (session?.user) {
+        setTimeout(async () => {
+          if (!mounted) return;
+          
+          try {
             const { data: profile } = await supabase
               .from('profiles')
               .select('name')
@@ -45,50 +98,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .eq('user_id', session.user.id)
               .single();
 
-            setUser({
-              ...session.user,
-              name: profile?.name,
-              role: roleData?.role as 'admin' | 'user'
-            });
-            setLoading(false);
-          }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        setTimeout(async () => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('id', session.user.id)
-            .single();
-          
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .single();
-
-          setUser({
-            ...session.user,
-            name: profile?.name,
-            role: roleData?.role as 'admin' | 'user'
-          });
-          setLoading(false);
+            if (mounted) {
+              setUser({
+                ...session.user,
+                name: profile?.name,
+                role: roleData?.role as 'admin' | 'user'
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          } finally {
+            if (mounted) {
+              setLoading(false);
+            }
+          }
         }, 0);
       } else {
         setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
