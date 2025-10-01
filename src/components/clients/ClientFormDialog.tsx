@@ -57,10 +57,10 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
         name: '',
         description: '',
         status: 'todo',
-        assigned_user_id: regularUsers[0]?.id || '',
+        assigned_user_id: profiles[0]?.id || '',
       });
     }
-  }, [client, reset, regularUsers]);
+  }, [client, reset, profiles.length]);
 
   const onSubmit = async (data: FormData) => {
     if (client) {
