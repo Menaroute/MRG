@@ -106,7 +106,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Button
             variant="ghost"
             className={cn(
-              'w-full h-9 px-3 font-normal text-sm rounded-lg transition-all text-destructive hover:text-destructive hover:bg-destructive/10',
+              'w-full h-9 px-3 font-normal text-sm rounded-lg transition-all text-destructive hover:text-destructive hover:bg-transparent',
               sidebarCollapsed ? 'justify-center' : 'justify-start'
             )}
             onClick={handleLogout}
@@ -161,7 +161,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-2 h-9"
+                  className="flex items-center gap-2 h-9 hover:bg-transparent"
                 >
                   <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
                     {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
