@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DataProvider } from "./contexts/DataContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
@@ -69,7 +69,6 @@ const App = () => (
 );
 
 function DashboardRouter() {
-  const { useAuth } = require('./contexts/AuthContext');
   const { isAdmin } = useAuth();
   return isAdmin ? <AdminDashboard /> : <UserDashboard />;
 }
