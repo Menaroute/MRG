@@ -31,27 +31,27 @@ export default function UserDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold">Mon tableau de bord</h2>
-          <p className="text-muted-foreground mt-1">Vue d'ensemble de mes clients assignés</p>
+          <h1 className="text-3xl font-bold tracking-tight">Mon tableau de bord</h1>
+          <p className="text-muted-foreground mt-2">Vue d'ensemble de mes clients assignés</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard title="Mes Clients" value={totalClients} icon={Briefcase} change={2.5} color="muted-foreground" />
-          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} color="success" />
-          <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} color="warning" />
-          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} color="destructive" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatsCard title="Mes Clients" value={totalClients} icon={Briefcase} change={2.5} />
+          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} />
+          <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} />
+          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} />
         </div>
 
         {statusData.length > 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>Distribution de mes statuts</CardTitle>
+              <CardTitle className="text-base font-semibold">Distribution de mes statuts</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
-                <PieChart style={{ fontFamily: 'Inter, sans-serif' }}>
+                <PieChart>
                   <Pie
                     data={statusData}
                     cx="50%"
@@ -59,9 +59,10 @@ export default function UserDashboard() {
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={100}
-                    fill="#8884d8"
+                    fill="hsl(var(--primary))"
                     dataKey="value"
-                    strokeWidth={0}
+                    strokeWidth={2}
+                    stroke="hsl(var(--background))"
                   >
                     {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -69,15 +70,14 @@ export default function UserDashboard() {
                   </Pie>
                   <Tooltip 
                     contentStyle={{ 
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '13px',
-                      borderRadius: '8px',
-                      border: '1px solid hsl(214, 32%, 91%)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      backgroundColor: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 'var(--radius)',
+                      fontSize: '12px',
                     }} 
                   />
                   <Legend 
-                    wrapperStyle={{ fontSize: '13px', fontFamily: 'Inter, sans-serif' }}
+                    wrapperStyle={{ fontSize: '12px' }}
                     iconType="circle"
                   />
                 </PieChart>
@@ -86,10 +86,12 @@ export default function UserDashboard() {
           </Card>
         ) : (
           <Card>
-            <CardContent className="p-12 text-center">
-              <Briefcase className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun client assigné</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="p-3 rounded-lg bg-muted/50 mb-4">
+                <Briefcase className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Aucun client assigné</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-sm">
                 Vous n'avez actuellement aucun client assigné. Contactez votre administrateur.
               </p>
             </CardContent>

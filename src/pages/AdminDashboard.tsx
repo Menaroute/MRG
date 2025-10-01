@@ -42,37 +42,38 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold">Tableau de bord</h2>
-          <p className="text-muted-foreground mt-1">Vue d'ensemble de tous les projets</p>
+          <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+          <p className="text-muted-foreground mt-2">Vue d'ensemble de tous les projets</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard title="Total Clients" value={totalClients} icon={Briefcase} change={2.5} color="muted-foreground" />
-          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} color="success" />
-          <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} color="warning" />
-          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} color="destructive" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatsCard title="Total Clients" value={totalClients} icon={Briefcase} change={2.5} />
+          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} />
+          <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} />
+          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card className="col-span-1">
             <CardHeader>
-              <CardTitle>Distribution des statuts</CardTitle>
+              <CardTitle className="text-base font-semibold">Distribution des statuts</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart style={{ fontFamily: 'Inter, sans-serif' }}>
+            <CardContent className="pl-2">
+              <ResponsiveContainer width="100%" height={320}>
+                <PieChart>
                   <Pie
                     data={statusData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
+                    outerRadius={90}
+                    fill="hsl(var(--primary))"
                     dataKey="value"
-                    strokeWidth={0}
+                    strokeWidth={2}
+                    stroke="hsl(var(--background))"
                   >
                     {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -80,11 +81,10 @@ export default function AdminDashboard() {
                   </Pie>
                   <Tooltip 
                     contentStyle={{ 
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '13px',
-                      borderRadius: '8px',
-                      border: '1px solid hsl(214, 32%, 91%)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      backgroundColor: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 'var(--radius)',
+                      fontSize: '12px',
                     }} 
                   />
                 </PieChart>
@@ -92,42 +92,41 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="col-span-1">
             <CardHeader>
-              <CardTitle>Charge de travail par utilisateur</CardTitle>
+              <CardTitle className="text-base font-semibold">Charge de travail par utilisateur</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={userWorkload} style={{ fontFamily: 'Inter, sans-serif' }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" vertical={false} />
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart data={userWorkload}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                   <XAxis 
                     dataKey="name" 
-                    tick={{ fontSize: 13 }}
-                    axisLine={{ stroke: 'hsl(214, 32%, 91%)' }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
                     tickLine={false}
                   />
                   <YAxis 
-                    tick={{ fontSize: 13 }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '13px',
-                      borderRadius: '8px',
-                      border: '1px solid hsl(214, 32%, 91%)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      backgroundColor: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 'var(--radius)',
+                      fontSize: '12px',
                     }}
-                    cursor={{ fill: 'hsl(214, 32%, 96%)' }}
+                    cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
                   />
                   <Legend 
-                    wrapperStyle={{ fontSize: '13px', fontFamily: 'Inter, sans-serif' }}
+                    wrapperStyle={{ fontSize: '12px' }}
                     iconType="circle"
                   />
-                  <Bar dataKey="done" name="Terminés" fill="hsl(142, 76%, 36%)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="inProgress" name="En cours" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="total" name="Total" fill="hsl(221, 83%, 53%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="done" name="Terminés" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="inProgress" name="En cours" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="total" name="Total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
