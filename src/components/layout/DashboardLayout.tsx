@@ -150,7 +150,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Breadcrumb>
 
           <div className="ml-auto flex items-center gap-4">
-            <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 h-9"
+              onClick={() => navigate('/profile')}
+            >
               <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
                 {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
               </div>
@@ -160,7 +164,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'User'}</span>
                 </div>
               )}
-            </div>
+            </Button>
           </div>
         </header>
 

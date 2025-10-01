@@ -12,6 +12,7 @@ import UserDashboard from "./pages/UserDashboard";
 import Users from "./pages/Users";
 import Clients from "./pages/Clients";
 import MyWork from "./pages/MyWork";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MyWork />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />

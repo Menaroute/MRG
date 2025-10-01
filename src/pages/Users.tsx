@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Shield, User as UserIcon, Plus } from 'lucide-react';
+import { Trash2, Shield, User as UserIcon, Plus, Edit, KeyRound } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -43,8 +43,12 @@ export default function Users() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
+  const [invitePassword, setInvitePassword] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'user'>('user');
   const [inviting, setInviting] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<{ id: string; name: string } | null>(null);
+  const [editName, setEditName] = useState('');
 
   const handleRoleChange = async (userId: string, role: 'admin' | 'user') => {
     await updateUserRole(userId, role);
@@ -67,31 +71,85 @@ export default function Users() {
     }
   };
 
+  const handleEdit = (profile: { id: string; name: string }) => {
+    setEditingUser(profile);
+    setEditName(profile.name);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingUser) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ name: editName })
+        .eq('id', editingUser.id);
+
+      if (error) throw error;
+
+      toast.success('Utilisateur modifié avec succès');
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      await refreshData();
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la modification');
+    }
+  };
+
+  const handleSendResetPassword = async () => {
+    if (!editingUser) return;
+
+    try {
+      const profile = profiles.find(p => p.id === editingUser.id);
+      if (!profile) throw new Error('Utilisateur non trouvé');
+
+      const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
+        redirectTo: `${window.location.origin}/login`
+      });
+
+      if (error) throw error;
+
+      toast.success('Email de réinitialisation envoyé');
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de l\'envoi');
+    }
+  };
+
   const handleInviteUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setInviting(true);
 
     try {
-      // Call edge function to invite user
-      const { data, error } = await supabase.functions.invoke('invite-user', {
-        body: {
-          email: inviteEmail,
-          name: inviteName,
-          role: inviteRole,
+      // Create user directly with password
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: inviteEmail,
+        password: invitePassword,
+        options: {
+          data: {
+            name: inviteName
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
 
-      toast.success('Invitation sent successfully!');
+      // Set the role
+      if (signUpData.user) {
+        await updateUserRole(signUpData.user.id, inviteRole);
+      }
+
+      toast.success('Utilisateur créé avec succès');
       setInviteDialogOpen(false);
       setInviteEmail('');
       setInviteName('');
+      setInvitePassword('');
       setInviteRole('user');
       await refreshData();
     } catch (error: any) {
-      console.error('Error inviting user:', error);
-      toast.error(error.message || 'Failed to send invitation');
+      console.error('Error creating user:', error);
+      toast.error(error.message || 'Erreur lors de la création');
     } finally {
       setInviting(false);
     }
@@ -109,7 +167,7 @@ export default function Users() {
           </div>
           <Button onClick={() => setInviteDialogOpen(true)} className="h-9">
             <Plus className="mr-2 h-4 w-4" />
-            Inviter un utilisateur
+            Créer un utilisateur
           </Button>
         </div>
 
@@ -138,7 +196,7 @@ export default function Users() {
                         onValueChange={(value) => handleRoleChange(profile.id, value as 'admin' | 'user')}
                         disabled={profile.id === user?.id}
                       >
-                        <SelectTrigger className="w-[140px] h-8">
+                        <SelectTrigger className="w-[140px] h-8 border-0 focus:ring-0">
                           <SelectValue>
                             <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
                               {profile.role === 'admin' ? (
@@ -175,6 +233,14 @@ export default function Users() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => handleEdit({ id: profile.id, name: profile.name })}
+                        disabled={profile.id === user?.id}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleDelete(profile.id)}
                         disabled={profile.id === user?.id}
                       >
@@ -196,12 +262,49 @@ export default function Users() {
           description={`Êtes-vous sûr de vouloir supprimer ${deletingProfile?.name} ? Cette action est irréversible.`}
         />
 
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Modifier l'utilisateur</DialogTitle>
+              <DialogDescription>
+                Modifiez le nom ou envoyez un email de réinitialisation du mot de passe.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Nom</Label>
+                <Input
+                  id="edit-name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                />
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleSendResetPassword}
+              >
+                <KeyRound className="mr-2 h-4 w-4" />
+                Envoyer un email de réinitialisation
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleSaveEdit}>
+                Enregistrer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Inviter un utilisateur</DialogTitle>
+              <DialogTitle>Créer un utilisateur</DialogTitle>
               <DialogDescription>
-                Un email d'invitation sera envoyé à l'utilisateur pour qu'il puisse créer son mot de passe.
+                Créez un nouveau compte utilisateur avec un mot de passe.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleInviteUser} className="space-y-4">
@@ -224,6 +327,18 @@ export default function Users() {
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="jean.dupont@company.com"
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invite-password">Mot de passe</Label>
+                <Input
+                  id="invite-password"
+                  type="password"
+                  value={invitePassword}
+                  onChange={(e) => setInvitePassword(e.target.value)}
+                  placeholder="Mot de passe"
+                  required
+                  minLength={6}
                 />
               </div>
               <div className="space-y-2">
@@ -253,7 +368,7 @@ export default function Users() {
                   Annuler
                 </Button>
                 <Button type="submit" disabled={inviting}>
-                  {inviting ? 'Envoi...' : 'Envoyer l\'invitation'}
+                  {inviting ? 'Création...' : 'Créer l\'utilisateur'}
                 </Button>
               </DialogFooter>
             </form>
