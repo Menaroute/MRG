@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Menu,
   ChevronRight,
+  User as UserIconProfile,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -20,6 +21,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.svg';
 
@@ -150,21 +157,34 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Breadcrumb>
 
           <div className="ml-auto flex items-center gap-4">
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 h-9"
-              onClick={() => navigate('/profile')}
-            >
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
-              </div>
-              {!sidebarCollapsed && (
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium leading-none">{user?.name || user?.email}</span>
-                  <span className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'User'}</span>
-                </div>
-              )}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 h-9"
+                >
+                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
+                    {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
+                  </div>
+                  {!sidebarCollapsed && (
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium leading-none">{user?.name || user?.email}</span>
+                      <span className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'User'}</span>
+                    </div>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <UserIconProfile className="mr-2 h-4 w-4" />
+                  Mon Profil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

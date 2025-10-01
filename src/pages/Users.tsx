@@ -47,8 +47,9 @@ export default function Users() {
   const [inviteRole, setInviteRole] = useState<'admin' | 'user'>('user');
   const [inviting, setInviting] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<{ id: string; name: string } | null>(null);
+  const [editingUser, setEditingUser] = useState<{ id: string; name: string; role: 'admin' | 'user' } | null>(null);
   const [editName, setEditName] = useState('');
+  const [editRole, setEditRole] = useState<'admin' | 'user'>('user');
 
   const handleRoleChange = async (userId: string, role: 'admin' | 'user') => {
     await updateUserRole(userId, role);
@@ -71,9 +72,10 @@ export default function Users() {
     }
   };
 
-  const handleEdit = (profile: { id: string; name: string }) => {
+  const handleEdit = (profile: { id: string; name: string; role: 'admin' | 'user' }) => {
     setEditingUser(profile);
     setEditName(profile.name);
+    setEditRole(profile.role);
     setEditDialogOpen(true);
   };
 
@@ -87,6 +89,11 @@ export default function Users() {
         .eq('id', editingUser.id);
 
       if (error) throw error;
+
+      // Update role if changed
+      if (editRole !== editingUser.role) {
+        await updateUserRole(editingUser.id, editRole);
+      }
 
       toast.success('Utilisateur modifié avec succès');
       setEditDialogOpen(false);
@@ -191,49 +198,25 @@ export default function Users() {
                     <TableCell className="font-medium">{profile.name}</TableCell>
                     <TableCell>{profile.email}</TableCell>
                     <TableCell>
-                      <Select
-                        value={profile.role || 'user'}
-                        onValueChange={(value) => handleRoleChange(profile.id, value as 'admin' | 'user')}
-                        disabled={profile.id === user?.id}
-                      >
-                        <SelectTrigger className="w-[140px] h-8 border-0 focus:ring-0">
-                          <SelectValue>
-                            <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
-                              {profile.role === 'admin' ? (
-                                <>
-                                  <Shield className="mr-1 h-3 w-3" />
-                                  Admin
-                                </>
-                              ) : (
-                                <>
-                                  <UserIcon className="mr-1 h-3 w-3" />
-                                  Utilisateur
-                                </>
-                              )}
-                            </Badge>
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">
-                            <div className="flex items-center">
-                              <UserIcon className="mr-2 h-3 w-3" />
-                              Utilisateur
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="admin">
-                            <div className="flex items-center">
-                              <Shield className="mr-2 h-3 w-3" />
-                              Admin
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                        {profile.role === 'admin' ? (
+                          <>
+                            <Shield className="mr-1 h-3 w-3" />
+                            Admin
+                          </>
+                        ) : (
+                          <>
+                            <UserIcon className="mr-1 h-3 w-3" />
+                            Utilisateur
+                          </>
+                        )}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEdit({ id: profile.id, name: profile.name })}
+                        onClick={() => handleEdit({ id: profile.id, name: profile.name, role: profile.role || 'user' })}
                         disabled={profile.id === user?.id}
                       >
                         <Edit className="h-4 w-4" />
@@ -278,6 +261,28 @@ export default function Users() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-role">Rôle</Label>
+                <Select value={editRole} onValueChange={(value) => setEditRole(value as 'admin' | 'user')}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">
+                      <div className="flex items-center">
+                        <UserIcon className="mr-2 h-3 w-3" />
+                        Utilisateur
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <div className="flex items-center">
+                        <Shield className="mr-2 h-3 w-3" />
+                        Admin
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button 
                 variant="outline" 
