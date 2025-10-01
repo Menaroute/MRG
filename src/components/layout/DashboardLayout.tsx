@@ -40,8 +40,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-60 border-r border-border/20 bg-sidebar flex flex-col">
-        <div className="p-5 border-b border-border/20">
+      <aside className="w-60 border-r bg-sidebar flex flex-col">
+        <div className="p-5">
           <img src={logo} alt="Infomineo" className="h-5" />
         </div>
         
@@ -54,10 +54,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 key={item.path}
                 variant="ghost"
                 className={cn(
-                  'w-full justify-start h-9 px-3 font-normal text-sm rounded-md',
+                  'w-full justify-start h-9 px-3 font-normal text-sm rounded-lg transition-all',
                   isActive 
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
-                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
+                    ? 'bg-background text-foreground font-medium shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] border border-border/50' 
+                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground border border-transparent'
                 )}
                 onClick={() => navigate(item.path)}
               >
@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border/20">
+        <div className="p-4">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
             <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
               {currentUser?.name?.charAt(0).toUpperCase()}
