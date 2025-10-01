@@ -9,16 +9,19 @@ interface StatsCardProps {
 }
 
 export default function StatsCard({ title, value, icon: Icon, color = 'primary' }: StatsCardProps) {
+  const colorClass = color === 'primary' ? 'text-primary' : `text-${color}`;
+  const bgClass = color === 'primary' ? 'bg-primary/10' : `bg-${color}/10`;
+  
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
+    <Card className="hover:shadow-md transition-all hover:border-border/60">
+      <CardContent className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-2">{value}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+            <p className="text-3xl font-semibold mt-2 tracking-tight">{value}</p>
           </div>
-          <div className={`p-3 rounded-xl bg-${color}/10`}>
-            <Icon className={`h-6 w-6 text-${color}`} />
+          <div className={`p-2.5 rounded-lg ${bgClass}`}>
+            <Icon className={`h-5 w-5 ${colorClass}`} />
           </div>
         </div>
       </CardContent>
