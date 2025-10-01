@@ -233,6 +233,7 @@ export default function Auth() {
                 <Input
                   id="signin-password"
                   type="password"
+                  placeholder="Votre mot de passe"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
