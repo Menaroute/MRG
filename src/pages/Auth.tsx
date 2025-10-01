@@ -27,11 +27,11 @@ export default function Auth() {
       navigate('/dashboard');
     }
 
-    // Check if this is a password reset callback
+    // Check if this is a password reset or invite callback
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     
-    if (type === 'recovery') {
+    if (type === 'recovery' || type === 'invite') {
       setIsPasswordReset(true);
     }
   }, [user, navigate, isPasswordReset]);
