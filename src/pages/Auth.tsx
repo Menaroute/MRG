@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import logo from '@/assets/logo.svg';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -137,7 +138,11 @@ export default function Auth() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex justify-center">
+          <img src={logo} alt="MRG" className="h-8" />
+        </div>
+        <Card>
         <CardHeader>
           <CardTitle>
             {isPasswordReset 
@@ -247,7 +252,8 @@ export default function Auth() {
             </form>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -169,10 +169,7 @@ export default function Users() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Liste des utilisateurs</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Table>
               <TableHeader>
                 <TableRow>

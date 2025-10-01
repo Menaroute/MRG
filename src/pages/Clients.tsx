@@ -79,10 +79,7 @@ export default function Clients() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Liste des clients</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Table>
               <TableHeader>
                 <TableRow>

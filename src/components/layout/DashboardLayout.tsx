@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.svg';
+import icon from '@/assets/icon.svg';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -73,8 +74,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           sidebarCollapsed ? "w-16" : "w-60"
         )}
       >
-        <div className="p-5 flex items-center justify-center">
-          {!sidebarCollapsed && <img src={logo} alt="Infomineo" className="h-5" />}
+        <div className={cn(
+          "p-5 flex items-center",
+          sidebarCollapsed ? "justify-center" : "justify-start"
+        )}>
+          {sidebarCollapsed ? (
+            <img src={icon} alt="MRG" className="h-8 w-8" />
+          ) : (
+            <img src={logo} alt="MRG" className="h-8" />
+          )}
         </div>
         
         <nav className="flex-1 p-4 space-y-1">
