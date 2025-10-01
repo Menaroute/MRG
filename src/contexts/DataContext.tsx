@@ -73,7 +73,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         id: p.id,
         email: p.email,
         name: p.name,
-        role: (p.user_roles as any)?.[0]?.role as 'admin' | 'user'
+        role: Array.isArray(p.user_roles) && p.user_roles.length > 0 
+          ? p.user_roles[0].role as 'admin' | 'user'
+          : 'user'
       })) || [];
 
       setProfiles(profilesWithRoles);
