@@ -218,8 +218,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Delete from auth.users (cascades to profiles and user_roles)
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // Use edge function to delete user with admin privileges
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId }
+      });
 
       if (error) throw error;
 
