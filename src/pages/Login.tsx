@@ -39,8 +39,7 @@ export default function Login() {
             <img src={logo} alt="Infomineo" className="h-8 mx-auto" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-semibold">Suivi Interne</CardTitle>
-            <CardDescription className="text-sm mt-1.5 text-muted-foreground">
+            <CardDescription className="text-sm text-muted-foreground">
               Connectez-vous pour accéder à votre espace
             </CardDescription>
           </div>
@@ -56,11 +55,16 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-11"
+                className="h-9"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">Mot de passe</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-sm font-medium text-foreground">Mot de passe</Label>
+                <a href="#" className="text-xs text-primary hover:underline">
+                  Mot de passe oublié ?
+                </a>
+              </div>
               <Input
                 id="password"
                 type="password"
@@ -68,28 +72,13 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11"
+                className="h-9"
               />
             </div>
-            <Button type="submit" className="w-full h-11 font-medium mt-6" disabled={loading}>
+            <Button type="submit" className="w-full h-9 font-medium mt-6" disabled={loading}>
               {loading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-muted/30 rounded-md border border-border/40">
-            <p className="text-xs text-muted-foreground text-center mb-3 font-medium">
-              Comptes de démonstration
-            </p>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-foreground">Admin:</span>
-                <span className="text-muted-foreground">admin@company.com / admin123</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-foreground">Utilisateur:</span>
-                <span className="text-muted-foreground">user@company.com / user123</span>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
