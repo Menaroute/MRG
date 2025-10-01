@@ -15,9 +15,9 @@ export interface Client {
   name: string;
   description?: string;
   status: WorkStatus;
-  assignedUserId: string;
-  createdAt: string;
-  updatedAt: string;
+  assigned_user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const STATUS_LABELS: Record<WorkStatus, string> = {

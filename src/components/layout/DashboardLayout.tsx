@@ -36,13 +36,13 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { currentUser, logout, isAdmin } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate('/login');
   };
 
@@ -147,10 +147,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 h-9">
                   <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                    {currentUser?.name?.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium leading-none">{currentUser?.name}</span>
+                    <span className="text-sm font-medium leading-none">{user?.name || user?.email}</span>
                     <span className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'User'}</span>
                   </div>
                 </Button>

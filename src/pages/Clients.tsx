@@ -19,7 +19,7 @@ import { Client, STATUS_LABELS } from '@/types';
 import { toast } from 'sonner';
 
 export default function Clients() {
-  const { clients, users, deleteClient } = useData();
+  const { clients, profiles, deleteClient } = useData();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -50,7 +50,7 @@ export default function Clients() {
   };
 
   const getUserName = (userId: string) => {
-    return users.find((u) => u.id === userId)?.name || 'Non assigné';
+    return profiles.find((u) => u.id === userId)?.name || 'Non assigné';
   };
 
   const getStatusColor = (status: string) => {
@@ -103,7 +103,7 @@ export default function Clients() {
                         {STATUS_LABELS[client.status]}
                       </Badge>
                     </TableCell>
-                    <TableCell>{getUserName(client.assignedUserId)}</TableCell>
+                    <TableCell>{getUserName(client.assigned_user_id)}</TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
                         variant="ghost"

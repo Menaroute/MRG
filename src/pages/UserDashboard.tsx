@@ -8,10 +8,10 @@ import { Briefcase, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { STATUS_LABELS, WorkStatus } from '@/types';
 
 export default function UserDashboard() {
-  const { currentUser } = useAuth();
-  const { getUserClients } = useData();
+  const { user } = useAuth();
+  const { clients } = useData();
 
-  const myClients = currentUser ? getUserClients(currentUser.id) : [];
+  const myClients = user ? clients.filter(c => c.assigned_user_id === user.id) : [];
   const totalClients = myClients.length;
   const doneClients = myClients.filter((c) => c.status === 'done').length;
   const inProgressClients = myClients.filter((c) => c.status === 'in-progress').length;

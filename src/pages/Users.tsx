@@ -13,47 +13,45 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Shield, User as UserIcon } from 'lucide-react';
-import UserFormDialog from '@/components/users/UserFormDialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Trash2, Shield, User as UserIcon } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import { User } from '@/types';
 import { toast } from 'sonner';
 
 export default function Users() {
-  const { users, deleteUser } = useData();
-  const { currentUser } = useAuth();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { profiles, updateUserRole, deleteUser } = useData();
+  const { user } = useAuth();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
-    setDialogOpen(true);
+  const handleRoleChange = async (userId: string, role: 'admin' | 'user') => {
+    await updateUserRole(userId, role);
   };
 
-  const handleDelete = (user: User) => {
-    if (user.id === currentUser?.id) {
+  const handleDelete = (userId: string) => {
+    if (userId === user?.id) {
       toast.error('Vous ne pouvez pas supprimer votre propre compte');
       return;
     }
-    setDeletingUser(user);
+    setDeletingUserId(userId);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (deletingUser) {
-      deleteUser(deletingUser.id);
-      toast.success('Utilisateur supprimé avec succès');
+  const confirmDelete = async () => {
+    if (deletingUserId) {
+      await deleteUser(deletingUserId);
       setDeleteDialogOpen(false);
-      setDeletingUser(null);
+      setDeletingUserId(null);
     }
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setEditingUser(null);
-  };
+  const deletingProfile = profiles.find(p => p.id === deletingUserId);
 
   return (
     <DashboardLayout>
@@ -61,12 +59,8 @@ export default function Users() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold">Utilisateurs</h2>
-            <p className="text-muted-foreground mt-1">Gérer les comptes utilisateurs</p>
+            <p className="text-muted-foreground mt-1">Gérer les rôles et comptes utilisateurs</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)} className="h-9">
-            <Plus className="mr-2 h-4 w-4" />
-            Ajouter un utilisateur
-          </Button>
         </div>
 
         <Card>
@@ -84,38 +78,55 @@ export default function Users() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                {profiles.map((profile) => (
+                  <TableRow key={profile.id}>
+                    <TableCell className="font-medium">{profile.name}</TableCell>
+                    <TableCell>{profile.email}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {user.role === 'admin' ? (
-                          <>
-                            <Shield className="mr-1 h-3 w-3" />
-                            Admin
-                          </>
-                        ) : (
-                          <>
-                            <UserIcon className="mr-1 h-3 w-3" />
-                            Utilisateur
-                          </>
-                        )}
-                      </Badge>
+                      <Select
+                        value={profile.role || 'user'}
+                        onValueChange={(value) => handleRoleChange(profile.id, value as 'admin' | 'user')}
+                        disabled={profile.id === user?.id}
+                      >
+                        <SelectTrigger className="w-[140px] h-8">
+                          <SelectValue>
+                            <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                              {profile.role === 'admin' ? (
+                                <>
+                                  <Shield className="mr-1 h-3 w-3" />
+                                  Admin
+                                </>
+                              ) : (
+                                <>
+                                  <UserIcon className="mr-1 h-3 w-3" />
+                                  Utilisateur
+                                </>
+                              )}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">
+                            <div className="flex items-center">
+                              <UserIcon className="mr-2 h-3 w-3" />
+                              Utilisateur
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="admin">
+                            <div className="flex items-center">
+                              <Shield className="mr-2 h-3 w-3" />
+                              Admin
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(user)}
-                        disabled={user.id === currentUser?.id}
+                        onClick={() => handleDelete(profile.id)}
+                        disabled={profile.id === user?.id}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -127,18 +138,12 @@ export default function Users() {
           </CardContent>
         </Card>
 
-        <UserFormDialog
-          open={dialogOpen}
-          onClose={handleCloseDialog}
-          user={editingUser}
-        />
-
         <DeleteConfirmDialog
           open={deleteDialogOpen}
           onClose={() => setDeleteDialogOpen(false)}
           onConfirm={confirmDelete}
           title="Supprimer l'utilisateur"
-          description={`Êtes-vous sûr de vouloir supprimer ${deletingUser?.name} ? Cette action est irréversible.`}
+          description={`Êtes-vous sûr de vouloir supprimer ${deletingProfile?.name} ? Cette action est irréversible.`}
         />
       </div>
     </DashboardLayout>

@@ -10,19 +10,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_LABELS, WorkStatus } from '@/types';
+import { STATUS_LABELS } from '@/types';
 import { toast } from 'sonner';
 import { Briefcase } from 'lucide-react';
 
+type WorkStatus = 'todo' | 'in-progress' | 'done' | 'waiting' | 'blocked';
+
 export default function MyWork() {
-  const { currentUser } = useAuth();
-  const { getUserClients, updateClient } = useData();
+  const { user } = useAuth();
+  const { clients, updateClient } = useData();
 
-  const myClients = currentUser ? getUserClients(currentUser.id) : [];
+  const myClients = user ? clients.filter(c => c.assigned_user_id === user.id) : [];
 
-  const handleStatusChange = (clientId: string, newStatus: WorkStatus) => {
-    updateClient(clientId, { status: newStatus });
-    toast.success('Statut mis à jour avec succès');
+  const handleStatusChange = async (clientId: string, newStatus: WorkStatus) => {
+    await updateClient(clientId, { status: newStatus });
   };
 
   const getStatusColor = (status: string) => {
@@ -85,7 +86,7 @@ export default function MyWork() {
                     </Select>
                   </div>
                   <div className="pt-2 border-t text-xs text-muted-foreground">
-                    Mis à jour: {new Date(client.updatedAt).toLocaleDateString('fr-FR')}
+                    Mis à jour: {new Date(client.updated_at).toLocaleDateString('fr-FR')}
                   </div>
                 </CardContent>
               </Card>

@@ -1,140 +1,255 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Client, User } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+export interface Client {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'todo' | 'in-progress' | 'done' | 'waiting' | 'blocked';
+  assigned_user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  name: string;
+  role?: 'admin' | 'user';
+}
 
 interface DataContextType {
   clients: Client[];
-  users: User[];
-  addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateClient: (id: string, updates: Partial<Client>) => void;
-  deleteClient: (id: string) => void;
-  addUser: (user: Omit<User, 'id'>) => void;
-  updateUser: (id: string, updates: Partial<User>) => void;
-  deleteUser: (id: string) => void;
-  getUserClients: (userId: string) => Client[];
+  profiles: Profile[];
+  loading: boolean;
+  addClient: (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  updateClient: (id: string, updates: Partial<Client>) => Promise<void>;
+  deleteClient: (id: string) => Promise<void>;
+  updateUserRole: (userId: string, role: 'admin' | 'user') => Promise<void>;
+  deleteUser: (userId: string) => Promise<void>;
+  refreshData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-const CLIENTS_KEY = 'tracking_app_clients';
-const USERS_KEY = 'tracking_app_users';
-
-// Initial sample data
-const INITIAL_CLIENTS: Client[] = [
-  {
-    id: '1',
-    name: 'Client Alpha',
-    description: 'Projet de développement web',
-    status: 'in-progress',
-    assignedUserId: '2',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Client Beta',
-    description: 'Application mobile',
-    status: 'todo',
-    assignedUserId: '2',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [clients, setClients] = useState<Client[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const { currentUser } = useAuth();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
+
+  const fetchData = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch clients
+      const { data: clientsData, error: clientsError } = await supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (clientsError) throw clientsError;
+      setClients(clientsData || []);
+
+      // Fetch profiles with roles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          name,
+          user_roles (role)
+        `);
+
+      if (profilesError) throw profilesError;
+
+      const profilesWithRoles = profilesData?.map(p => ({
+        id: p.id,
+        email: p.email,
+        name: p.name,
+        role: (p.user_roles as any)?.[0]?.role as 'admin' | 'user'
+      })) || [];
+
+      setProfiles(profilesWithRoles);
+    } catch (error: any) {
+      console.error('Error fetching data:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load data'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Load data from localStorage
-    const savedClients = localStorage.getItem(CLIENTS_KEY);
-    if (savedClients) {
-      setClients(JSON.parse(savedClients));
-    } else {
-      localStorage.setItem(CLIENTS_KEY, JSON.stringify(INITIAL_CLIENTS));
-      setClients(INITIAL_CLIENTS);
+    fetchData();
+  }, [user]);
+
+  const addClient = async (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .insert([client]);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Client added successfully'
+      });
+
+      await fetchData();
+    } catch (error: any) {
+      console.error('Error adding client:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to add client'
+      });
+      throw error;
+    }
+  };
+
+  const updateClient = async (id: string, updates: Partial<Client>) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Client updated successfully'
+      });
+
+      await fetchData();
+    } catch (error: any) {
+      console.error('Error updating client:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update client'
+      });
+      throw error;
+    }
+  };
+
+  const deleteClient = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Client deleted successfully'
+      });
+
+      await fetchData();
+    } catch (error: any) {
+      console.error('Error deleting client:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to delete client'
+      });
+      throw error;
+    }
+  };
+
+  const updateUserRole = async (userId: string, role: 'admin' | 'user') => {
+    if (!isAdmin) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Only admins can change user roles'
+      });
+      return;
     }
 
-    const savedUsers = localStorage.getItem(USERS_KEY);
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ role })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'User role updated successfully'
+      });
+
+      await fetchData();
+    } catch (error: any) {
+      console.error('Error updating user role:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update user role'
+      });
+      throw error;
     }
-  }, []);
-
-  const saveClients = (newClients: Client[]) => {
-    setClients(newClients);
-    localStorage.setItem(CLIENTS_KEY, JSON.stringify(newClients));
   };
 
-  const saveUsers = (newUsers: User[]) => {
-    setUsers(newUsers);
-    localStorage.setItem(USERS_KEY, JSON.stringify(newUsers));
-  };
-
-  const addClient = (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newClient: Client = {
-      ...client,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    saveClients([...clients, newClient]);
-  };
-
-  const updateClient = (id: string, updates: Partial<Client>) => {
-    const newClients = clients.map((client) =>
-      client.id === id
-        ? { ...client, ...updates, updatedAt: new Date().toISOString() }
-        : client
-    );
-    saveClients(newClients);
-  };
-
-  const deleteClient = (id: string) => {
-    saveClients(clients.filter((client) => client.id !== id));
-  };
-
-  const addUser = (user: Omit<User, 'id'>) => {
-    const newUser: User = {
-      ...user,
-      id: Date.now().toString(),
-    };
-    saveUsers([...users, newUser]);
-  };
-
-  const updateUser = (id: string, updates: Partial<User>) => {
-    const newUsers = users.map((user) =>
-      user.id === id ? { ...user, ...updates } : user
-    );
-    saveUsers(newUsers);
-  };
-
-  const deleteUser = (id: string) => {
-    if (currentUser?.id === id) {
-      return; // Can't delete yourself
+  const deleteUser = async (userId: string) => {
+    if (!isAdmin) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Only admins can delete users'
+      });
+      return;
     }
-    saveUsers(users.filter((user) => user.id !== id));
-    // Also remove all clients assigned to this user
-    saveClients(clients.filter((client) => client.assignedUserId !== id));
-  };
 
-  const getUserClients = (userId: string) => {
-    return clients.filter((client) => client.assignedUserId === userId);
+    try {
+      // Delete from auth.users (cascades to profiles and user_roles)
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'User deleted successfully'
+      });
+
+      await fetchData();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to delete user'
+      });
+      throw error;
+    }
   };
 
   return (
     <DataContext.Provider
       value={{
         clients,
-        users,
+        profiles,
+        loading,
         addClient,
         updateClient,
         deleteClient,
-        addUser,
-        updateUser,
+        updateUserRole,
         deleteUser,
-        getUserClients,
+        refreshData: fetchData
       }}
     >
       {children}

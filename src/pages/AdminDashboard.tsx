@@ -7,7 +7,7 @@ import { Briefcase, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { STATUS_LABELS, WorkStatus } from '@/types';
 
 export default function AdminDashboard() {
-  const { clients, users } = useData();
+  const { clients, profiles } = useData();
 
   const totalClients = clients.length;
   const doneClients = clients.filter((c) => c.status === 'done').length;
@@ -26,10 +26,10 @@ export default function AdminDashboard() {
   }));
 
   // User workload data
-  const userWorkload = users
+  const userWorkload = profiles
     .filter((u) => u.role === 'user')
     .map((user) => {
-      const userClients = clients.filter((c) => c.assignedUserId === user.id);
+      const userClients = clients.filter((c) => c.assigned_user_id === user.id);
       return {
         name: user.name,
         total: userClients.length,

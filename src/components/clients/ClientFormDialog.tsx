@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Client, WorkStatus, STATUS_LABELS } from '@/types';
-import { toast } from 'sonner';
+import { WorkStatus, STATUS_LABELS } from '@/types';
+import { Client } from '@/contexts/DataContext';
 
 interface ClientFormDialogProps {
   open: boolean;
@@ -32,17 +32,17 @@ interface FormData {
   name: string;
   description: string;
   status: WorkStatus;
-  assignedUserId: string;
+  assigned_user_id: string;
 }
 
 export default function ClientFormDialog({ open, onClose, client }: ClientFormDialogProps) {
-  const { addClient, updateClient, users } = useData();
+  const { addClient, updateClient, profiles } = useData();
   const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>();
 
   const status = watch('status');
-  const assignedUserId = watch('assignedUserId');
+  const assigned_user_id = watch('assigned_user_id');
 
-  const regularUsers = users.filter((u) => u.role === 'user');
+  const regularUsers = profiles.filter((u) => u.role === 'user');
 
   useEffect(() => {
     if (client) {
@@ -50,35 +50,33 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
         name: client.name,
         description: client.description || '',
         status: client.status,
-        assignedUserId: client.assignedUserId,
+        assigned_user_id: client.assigned_user_id,
       });
     } else {
       reset({
         name: '',
         description: '',
         status: 'todo',
-        assignedUserId: regularUsers[0]?.id || '',
+        assigned_user_id: regularUsers[0]?.id || '',
       });
     }
   }, [client, reset, regularUsers]);
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     if (client) {
-      updateClient(client.id, {
+      await updateClient(client.id, {
         name: data.name,
         description: data.description,
         status: data.status,
-        assignedUserId: data.assignedUserId,
+        assigned_user_id: data.assigned_user_id,
       });
-      toast.success('Client modifié avec succès');
     } else {
-      addClient({
+      await addClient({
         name: data.name,
         description: data.description,
         status: data.status,
-        assignedUserId: data.assignedUserId,
+        assigned_user_id: data.assigned_user_id,
       });
-      toast.success('Client ajouté avec succès');
     }
     onClose();
   };
@@ -117,7 +115,7 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="user">Assigné à</Label>
-            <Select value={assignedUserId} onValueChange={(value) => setValue('assignedUserId', value)}>
+            <Select value={assigned_user_id} onValueChange={(value) => setValue('assigned_user_id', value)}>
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Sélectionner un utilisateur" />
               </SelectTrigger>
