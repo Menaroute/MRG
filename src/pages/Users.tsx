@@ -63,7 +63,7 @@ export default function Users() {
             <h2 className="text-3xl font-bold">Utilisateurs</h2>
             <p className="text-muted-foreground mt-1">Gérer les comptes utilisateurs</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => setDialogOpen(true)} className="h-9">
             <Plus className="mr-2 h-4 w-4" />
             Ajouter un utilisateur
           </Button>

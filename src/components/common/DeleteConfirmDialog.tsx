@@ -32,8 +32,8 @@ export default function DeleteConfirmDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <AlertDialogCancel className="h-9">Annuler</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} className="h-9 bg-destructive text-destructive-foreground hover:bg-destructive/90">
             Supprimer
           </AlertDialogAction>
         </AlertDialogFooter>

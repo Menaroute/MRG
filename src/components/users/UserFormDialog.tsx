@@ -90,16 +90,16 @@ export default function UserFormDialog({ open, onClose, user }: UserFormDialogPr
             {user ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+          <div className="space-y-1.5">
             <Label htmlFor="name">Nom</Label>
-            <Input id="name" {...register('name', { required: true })} />
+            <Input id="name" {...register('name', { required: true })} className="h-9" />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register('email', { required: true })} />
+            <Input id="email" type="email" {...register('email', { required: true })} className="h-9" />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="password">
               {user ? 'Mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
             </Label>
@@ -107,12 +107,13 @@ export default function UserFormDialog({ open, onClose, user }: UserFormDialogPr
               id="password"
               type="password"
               {...register('password', { required: !user })}
+              className="h-9"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="role">Rôle</Label>
             <Select value={role} onValueChange={(value) => setValue('role', value as UserRole)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue placeholder="Sélectionner un rôle" />
               </SelectTrigger>
               <SelectContent>
@@ -121,11 +122,11 @@ export default function UserFormDialog({ open, onClose, user }: UserFormDialogPr
               </SelectContent>
             </Select>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="outline" onClick={onClose} className="h-9">
               Annuler
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="h-9">
               {user ? 'Enregistrer' : 'Ajouter'}
             </Button>
           </DialogFooter>

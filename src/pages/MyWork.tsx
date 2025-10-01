@@ -72,7 +72,7 @@ export default function MyWork() {
                       value={client.status}
                       onValueChange={(value) => handleStatusChange(client.id, value as WorkStatus)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-9">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

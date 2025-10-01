@@ -72,7 +72,7 @@ export default function Clients() {
             <h2 className="text-3xl font-bold">Clients</h2>
             <p className="text-muted-foreground mt-1">Gérer les clients et leurs statuts</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => setDialogOpen(true)} className="h-9">
             <Plus className="mr-2 h-4 w-4" />
             Ajouter un client
           </Button>

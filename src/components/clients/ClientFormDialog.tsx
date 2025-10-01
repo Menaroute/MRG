@@ -91,19 +91,19 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
             {client ? 'Modifier le client' : 'Ajouter un client'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+          <div className="space-y-1.5">
             <Label htmlFor="name">Nom</Label>
-            <Input id="name" {...register('name', { required: true })} />
+            <Input id="name" {...register('name', { required: true })} className="h-9" />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" {...register('description')} rows={3} />
+            <Textarea id="description" {...register('description')} rows={3} className="text-sm" />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="status">Statut</Label>
             <Select value={status} onValueChange={(value) => setValue('status', value as WorkStatus)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
@@ -115,10 +115,10 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="user">Assigné à</Label>
             <Select value={assignedUserId} onValueChange={(value) => setValue('assignedUserId', value)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue placeholder="Sélectionner un utilisateur" />
               </SelectTrigger>
               <SelectContent>
@@ -130,11 +130,11 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
               </SelectContent>
             </Select>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="outline" onClick={onClose} className="h-9">
               Annuler
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="h-9">
               {client ? 'Enregistrer' : 'Ajouter'}
             </Button>
           </DialogFooter>
