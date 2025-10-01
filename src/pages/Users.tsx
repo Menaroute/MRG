@@ -72,20 +72,16 @@ export default function Users() {
     setInviting(true);
 
     try {
-      // Invite user via Supabase Auth
-      const { data, error } = await supabase.auth.admin.inviteUserByEmail(inviteEmail, {
-        data: {
+      // Call edge function to invite user
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: {
+          email: inviteEmail,
           name: inviteName,
-        },
-        redirectTo: `${window.location.origin}/auth`
+          role: inviteRole,
+        }
       });
 
       if (error) throw error;
-
-      // Set the role after invitation
-      if (data.user) {
-        await updateUserRole(data.user.id, inviteRole);
-      }
 
       toast.success('Invitation sent successfully!');
       setInviteDialogOpen(false);
