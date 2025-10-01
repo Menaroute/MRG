@@ -43,7 +43,6 @@ export default function Users() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
-  const [invitePassword, setInvitePassword] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'user'>('user');
   const [inviting, setInviting] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -128,35 +127,26 @@ export default function Users() {
     setInviting(true);
 
     try {
-      // Create user directly with password
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: inviteEmail,
-        password: invitePassword,
-        options: {
-          data: {
-            name: inviteName
-          },
-          emailRedirectTo: `${window.location.origin}/login`
+      // Use the invite-user edge function to avoid logging the admin out
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: {
+          email: inviteEmail,
+          name: inviteName,
+          role: inviteRole
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (error) throw error;
 
-      // Set the role
-      if (signUpData.user) {
-        await updateUserRole(signUpData.user.id, inviteRole);
-      }
-
-      toast.success('Utilisateur créé avec succès');
+      toast.success('Invitation envoyée avec succès. L\'utilisateur recevra un email pour définir son mot de passe.');
       setInviteDialogOpen(false);
       setInviteEmail('');
       setInviteName('');
-      setInvitePassword('');
       setInviteRole('user');
       await refreshData();
     } catch (error: any) {
-      console.error('Error creating user:', error);
-      toast.error(error.message || 'Erreur lors de la création');
+      console.error('Error inviting user:', error);
+      toast.error(error.message || 'Erreur lors de l\'invitation');
     } finally {
       setInviting(false);
     }
@@ -174,7 +164,7 @@ export default function Users() {
           </div>
           <Button onClick={() => setInviteDialogOpen(true)} className="h-9">
             <Plus className="mr-2 h-4 w-4" />
-            Créer un utilisateur
+            Inviter un utilisateur
           </Button>
         </div>
 
@@ -307,9 +297,9 @@ export default function Users() {
         <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Créer un utilisateur</DialogTitle>
+              <DialogTitle>Inviter un utilisateur</DialogTitle>
               <DialogDescription>
-                Créez un nouveau compte utilisateur avec un mot de passe.
+                L'utilisateur recevra un email pour définir son mot de passe.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleInviteUser} className="space-y-4">
@@ -332,18 +322,6 @@ export default function Users() {
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="jean.dupont@company.com"
                   required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="invite-password">Mot de passe</Label>
-                <Input
-                  id="invite-password"
-                  type="password"
-                  value={invitePassword}
-                  onChange={(e) => setInvitePassword(e.target.value)}
-                  placeholder="Mot de passe"
-                  required
-                  minLength={6}
                 />
               </div>
               <div className="space-y-2">
@@ -373,7 +351,7 @@ export default function Users() {
                   Annuler
                 </Button>
                 <Button type="submit" disabled={inviting}>
-                  {inviting ? 'Création...' : 'Créer l\'utilisateur'}
+                  {inviting ? 'Envoi...' : 'Envoyer l\'invitation'}
                 </Button>
               </DialogFooter>
             </form>
