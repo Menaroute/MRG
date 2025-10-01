@@ -33,34 +33,34 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md border-border/50 shadow-lg">
-        <CardHeader className="space-y-4 text-center pb-8">
+      <Card className="w-full max-w-md shadow-sm">
+        <CardHeader className="space-y-3 text-center pb-6">
           <div className="mx-auto">
-            <img src={logo} alt="Infomineo" className="h-10 mx-auto" />
+            <img src={logo} alt="Infomineo" className="h-8 mx-auto" />
           </div>
           <div>
             <CardTitle className="text-2xl font-semibold">Suivi Interne</CardTitle>
-            <CardDescription className="text-sm mt-2">
+            <CardDescription className="text-sm mt-1.5 text-muted-foreground">
               Connectez-vous pour accéder à votre espace
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="votre@email.com"
+                placeholder="m@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10"
+                className="h-11"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -68,18 +68,18 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-10"
+                className="h-11"
               />
             </div>
-            <Button type="submit" className="w-full h-10 font-medium" disabled={loading}>
+            <Button type="submit" className="w-full h-11 font-medium mt-6" disabled={loading}>
               {loading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border/50">
+          <div className="mt-6 p-4 bg-muted/30 rounded-md border border-border/40">
             <p className="text-xs text-muted-foreground text-center mb-3 font-medium">
               Comptes de démonstration
             </p>
-            <div className="space-y-2.5 text-xs">
+            <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-foreground">Admin:</span>
                 <span className="text-muted-foreground">admin@company.com / admin123</span>
