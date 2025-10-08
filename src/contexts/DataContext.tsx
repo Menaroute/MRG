@@ -2,16 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
-export interface Client {
-  id: string;
-  name: string;
-  description?: string;
-  status: 'todo' | 'in-progress' | 'done' | 'waiting' | 'blocked';
-  assigned_user_id: string;
-  created_at: string;
-  updated_at: string;
-}
+import { Client } from '@/types';
 
 export interface Profile {
   id: string;

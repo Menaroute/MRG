@@ -11,6 +11,7 @@ import {
   Menu,
   ChevronRight,
   User as UserIconProfile,
+  History as HistoryIcon,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -51,6 +52,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
         { path: '/users', icon: Users, label: 'Utilisateurs' },
         { path: '/clients', icon: Briefcase, label: 'Clients' },
+        { path: '/history', icon: HistoryIcon, label: 'Historique' },
       ]
     : [
         { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },

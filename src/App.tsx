@@ -13,6 +13,7 @@ import Users from "./pages/Users";
 import Clients from "./pages/Clients";
 import MyWork from "./pages/MyWork";
 import Profile from "./pages/Profile";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,14 @@ const App = () => (
                 element={
                   <ProtectedRoute adminOnly>
                     <Clients />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <History />
                   </ProtectedRoute>
                 }
               />

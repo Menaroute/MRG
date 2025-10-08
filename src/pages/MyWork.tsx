@@ -37,18 +37,26 @@ export default function MyWork() {
     return colors[status as keyof typeof colors] || 'secondary';
   };
 
+  const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold">Mon travail</h2>
-          <p className="text-muted-foreground mt-1">Gérer les statuts de mes clients</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold">Mon travail</h2>
+            <p className="text-muted-foreground mt-1">Gérer les statuts de mes clients</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">Période actuelle</p>
+            <p className="text-lg font-semibold capitalize">{currentMonth}</p>
+          </div>
         </div>
 
         {myClients.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myClients.map((client) => (
-              <Card key={client.id} className="hover:shadow-lg transition-shadow">
+              <Card key={client.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-primary" />

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -6,19 +7,34 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { STATUS_LABELS, WorkStatus } from '@/types';
+import { isClientVisibleInCurrentPeriod } from '@/utils/periodicity';
+import { usePeriodReset } from '@/hooks/use-period-reset';
 
 export default function UserDashboard() {
   const { user } = useAuth();
   const { clients } = useData();
+  
+  // Check and reset periods for assigned clients
+  usePeriodReset(clients.filter(c => c.assigned_user_id === user?.id), user?.id);
 
-  const myClients = user ? clients.filter(c => c.assigned_user_id === user.id) : [];
-  const totalClients = myClients.length;
-  const doneClients = myClients.filter((c) => c.status === 'done').length;
-  const inProgressClients = myClients.filter((c) => c.status === 'in-progress').length;
-  const blockedClients = myClients.filter((c) => c.status === 'blocked').length;
+  // Filter clients to show only current period data
+  const filteredClients = useMemo(() => {
+    // Only show clients assigned to user and visible in current period
+    return user 
+      ? clients.filter(c => 
+          c.assigned_user_id === user.id && 
+          isClientVisibleInCurrentPeriod(c, false) // Users only see clients in their period
+        ) 
+      : [];
+  }, [clients, user]);
+
+  const totalClients = filteredClients.length;
+  const doneClients = filteredClients.filter((c) => c.status === 'done').length;
+  const inProgressClients = filteredClients.filter((c) => c.status === 'in-progress').length;
+  const blockedClients = filteredClients.filter((c) => c.status === 'blocked').length;
 
   const statusData = Object.entries(
-    myClients.reduce((acc, client) => {
+    filteredClients.reduce((acc, client) => {
       acc[client.status] = (acc[client.status] || 0) + 1;
       return acc;
     }, {} as Record<WorkStatus, number>)
@@ -29,12 +45,20 @@ export default function UserDashboard() {
 
   const COLORS = ['hsl(220, 13%, 75%)', 'hsl(38, 92%, 50%)', 'hsl(142, 76%, 36%)', 'hsl(199, 89%, 48%)', 'hsl(0, 84%, 60%)'];
 
+  const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Mon tableau de bord</h1>
-          <p className="text-muted-foreground mt-2">Vue d'ensemble de mes clients assignés</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Mon tableau de bord</h1>
+            <p className="text-muted-foreground mt-2">Vue d'ensemble de mes clients assignés</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">Période actuelle</p>
+            <p className="text-lg font-semibold capitalize">{currentMonth}</p>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
