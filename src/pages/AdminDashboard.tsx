@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, CheckCircle2, Clock, AlertCircle, Filter, ChevronDown, X, RotateCcw, ListTodo } from 'lucide-react';
+import { Briefcase, CheckCircle2, Clock, AlertCircle, Filter, ChevronDown, X, RotateCcw, ListTodo, FileDown } from 'lucide-react';
 import { STATUS_LABELS, WorkStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,8 @@ import { useSessionStorage } from '@/hooks/use-session-storage';
 import MonthRangeFilter from '@/components/MonthRangeFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { isClientRelevantForMonthRange } from '@/utils/periodicity';
+import { PERIODICITY_LABELS } from '@/types';
+import { toast } from 'sonner';
 
 interface MonthRange {
   start: { month: number; year: number };
@@ -227,6 +229,109 @@ export default function AdminDashboard() {
 
   const COLORS = ['hsl(220, 13%, 75%)', 'hsl(38, 92%, 50%)', 'hsl(142, 76%, 36%)', 'hsl(199, 89%, 48%)', 'hsl(0, 84%, 60%)'];
 
+  const getUserName = (userId: string) => {
+    return profiles.find((u) => u.id === userId)?.name || 'Non assigné';
+  };
+
+  const exportToPDF = () => {
+    // Create a simple HTML table for PDF export
+    const tableHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Tableau de bord - ${new Date().toLocaleDateString('fr-FR')}</title>
+        <style>
+          @media print {
+            body { margin: 0; }
+          }
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
+          .info { color: #666; font-size: 14px; margin-bottom: 20px; }
+          .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+          .stat-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9; }
+          .stat-title { font-size: 12px; color: #666; margin-bottom: 5px; }
+          .stat-value { font-size: 28px; font-weight: bold; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; font-weight: bold; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+        </style>
+      </head>
+      <body>
+        <h1>Tableau de bord</h1>
+        <div class="info">
+          <p>Exporté le: ${new Date().toLocaleString('fr-FR')}</p>
+          <p>Total: ${filteredClients.length} client(s)</p>
+        </div>
+        
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-title">Total Clients</div>
+            <div class="stat-value">${totalClients}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">À faire</div>
+            <div class="stat-value">${todoClients}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">En cours</div>
+            <div class="stat-value">${inProgressClients}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Terminés</div>
+            <div class="stat-value">${doneClients}</div>
+          </div>
+        </div>
+        
+        <h2 style="font-size: 18px; margin-top: 30px; margin-bottom: 15px;">Liste des clients</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Description</th>
+              <th>Statut</th>
+              <th>Assigné à</th>
+              <th>Périodicité</th>
+              <th>Mois</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredClients.map(client => `
+              <tr>
+                <td>${client.name}</td>
+                <td>${client.description || '-'}</td>
+                <td>${STATUS_LABELS[client.status]}</td>
+                <td>${getUserName(client.assigned_user_id)}</td>
+                <td>${PERIODICITY_LABELS[client.periodicity]}</td>
+                <td>${client.periodicity_months?.join(', ') || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() {
+              window.close();
+            };
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([tableHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+    
+    if (printWindow) {
+      toast.success(`Dialogue d'impression ouvert - Sélectionnez "Enregistrer au format PDF"`);
+    } else {
+      toast.error('Impossible d\'ouvrir la fenêtre. Veuillez autoriser les popups.');
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -262,6 +367,15 @@ export default function AdminDashboard() {
                 Effacer
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToPDF}
+              className="h-9"
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Exporter PDF
+            </Button>
           </div>
         </div>
 

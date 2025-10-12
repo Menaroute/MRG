@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Clock, Filter, X, RotateCcw, ChevronDown, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Clock, Filter, X, RotateCcw, ChevronDown, ArrowUpDown, ArrowUp, ArrowDown, Download } from 'lucide-react';
 import { ClientStatusHistory } from '@/types';
 import { STATUS_LABELS, WorkStatus } from '@/types';
 import { getPeriodLabel } from '@/utils/periodicity';
@@ -25,6 +25,7 @@ import { Label } from '@/components/ui/label';
 import { useSessionStorage } from '@/hooks/use-session-storage';
 import MonthRangeFilter from '@/components/MonthRangeFilter';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 interface MonthRange {
   start: { month: number; year: number };
@@ -306,6 +307,37 @@ export default function History() {
     }
   };
 
+  const exportToCSV = () => {
+    const headers = ['Date & Heure', 'Client', 'Période', 'Utilisateur', 'Ancien Statut', 'Nouveau Statut'];
+    const rows = filteredHistory.map(record => [
+      format(new Date(record.changed_at), 'PPp', { locale: fr }),
+      record.client_name || '-',
+      getPeriodLabel(record.period_key) || '-',
+      record.user_name || '-',
+      record.old_status ? STATUS_LABELS[record.old_status as WorkStatus] : '-',
+      STATUS_LABELS[record.new_status as WorkStatus]
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Add BOM for proper UTF-8 encoding
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `historique_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success(`${filteredHistory.length} enregistrement(s) exporté(s) en CSV`);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -316,6 +348,10 @@ export default function History() {
               Suivi de tous les changements de statut des clients
             </p>
           </div>
+          <Button variant="outline" onClick={exportToCSV} className="h-9">
+            <Download className="mr-2 h-4 w-4" />
+            Exporter CSV
+          </Button>
         </div>
 
         <Card>

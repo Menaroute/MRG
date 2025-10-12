@@ -15,7 +15,7 @@ interface DataContextType {
   clients: Client[];
   profiles: Profile[];
   loading: boolean;
-  addClient: (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  addClient: (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>, options?: { silent?: boolean }) => Promise<void>;
   updateClient: (id: string, updates: Partial<Client>) => Promise<void>;
   deleteClient: (id: string) => Promise<void>;
   updateUserRole: (userId: string, role: 'admin' | 'user') => Promise<void>;
@@ -86,7 +86,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     fetchData();
   }, [user]);
 
-  const addClient = async (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => {
+  const addClient = async (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>, options?: { silent?: boolean }) => {
     try {
       const { error } = await supabase
         .from('clients')
@@ -94,19 +94,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      toast({
-        title: 'Success',
-        description: 'Client added successfully'
-      });
+      if (!options?.silent) {
+        toast({
+          title: 'Success',
+          description: 'Client added successfully'
+        });
+      }
 
       await fetchData();
     } catch (error: any) {
       console.error('Error adding client:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to add client'
-      });
+      if (!options?.silent) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: error.message || 'Failed to add client'
+        });
+      }
       throw error;
     }
   };
@@ -145,11 +149,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         .eq('id', id);
 
       if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Client deleted successfully'
-      });
 
       await fetchData();
     } catch (error: any) {

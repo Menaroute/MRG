@@ -1,0 +1,9 @@
+nom,description,statut,email_utilisateur,periodicite,mois_periodicite
+Client ABC,Description détaillée du client ABC - Projet mensuel,a_faire,user@example.com,mensuel,"1,2,3,4,5,6,7,8,9,10,11,12"
+Client XYZ,Projet trimestriel - Révision chaque trimestre,en_cours,user@example.com,trimestriel,"1,4,7,10"
+Client 123,Audit semestriel - Janvier et Juillet,termine,user@example.com,semestriel,"1,7"
+Client DEF,Revue annuelle - Chaque janvier,a_faire,user@example.com,annuel,1
+Entreprise Alpha,Client mensuel avec suivi régulier,en_cours,user@example.com,mensuel,"1,2,3,4,5,6,7,8,9,10,11,12"
+Entreprise Beta,Consultation trimestrielle,a_faire,user@example.com,trimestriel,"2,5,8,11"
+Société Gamma,Bilan semestriel,termine,user@example.com,semestriel,"6,12"
+
