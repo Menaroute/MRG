@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Briefcase, CheckCircle2, Clock, AlertCircle, ListTodo } from 'lucide-react';
 import { STATUS_LABELS, WorkStatus } from '@/types';
 import { isClientVisibleInCurrentPeriod } from '@/utils/periodicity';
 import { usePeriodReset } from '@/hooks/use-period-reset';
@@ -29,9 +29,9 @@ export default function UserDashboard() {
   }, [clients, user]);
 
   const totalClients = filteredClients.length;
+  const todoClients = filteredClients.filter((c) => c.status === 'todo').length;
   const doneClients = filteredClients.filter((c) => c.status === 'done').length;
   const inProgressClients = filteredClients.filter((c) => c.status === 'in-progress').length;
-  const blockedClients = filteredClients.filter((c) => c.status === 'blocked').length;
 
   const statusData = Object.entries(
     filteredClients.reduce((acc, client) => {
@@ -43,7 +43,7 @@ export default function UserDashboard() {
     value: count,
   }));
 
-  const COLORS = ['hsl(220, 13%, 75%)', 'hsl(38, 92%, 50%)', 'hsl(142, 76%, 36%)', 'hsl(199, 89%, 48%)', 'hsl(0, 84%, 60%)'];
+  const COLORS = ['hsl(220, 13%, 75%)', 'hsl(38, 92%, 50%)', 'hsl(142, 76%, 36%)'];
 
   const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
@@ -63,9 +63,9 @@ export default function UserDashboard() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard title="Mes Clients" value={totalClients} icon={Briefcase} change={2.5} />
-          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} />
+          <StatsCard title="À faire" value={todoClients} icon={ListTodo} change={0} />
           <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} />
-          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} />
+          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} />
         </div>
 
         {statusData.length > 0 ? (

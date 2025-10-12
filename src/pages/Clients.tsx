@@ -17,6 +17,7 @@ import ClientFormDialog from '@/components/clients/ClientFormDialog';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import { Client, STATUS_LABELS, PERIODICITY_LABELS } from '@/types';
 import MonthRangeFilter from '@/components/MonthRangeFilter';
+import { isClientRelevantForMonthRange } from '@/utils/periodicity';
 
 interface MonthRange {
   start: { month: number; year: number };
@@ -129,18 +130,17 @@ export default function Clients() {
     
     let filtered = clients;
     
-    // Apply month range filter
+    // Apply month range filter based on periodicity
     if (monthRange) {
       filtered = clients.filter(c => {
-        const updatedDate = new Date(c.updated_at);
-        const updatedMonth = updatedDate.getMonth() + 1;
-        const updatedYear = updatedDate.getFullYear();
-        
-        const clientDate = new Date(updatedYear, updatedMonth - 1);
-        const startDate = new Date(monthRange.start.year, monthRange.start.month - 1);
-        const endDate = new Date(monthRange.end.year, monthRange.end.month - 1);
-        
-        return clientDate >= startDate && clientDate <= endDate;
+        // Check if client is relevant for the selected month range based on its periodicity
+        return isClientRelevantForMonthRange(
+          c,
+          monthRange.start.month,
+          monthRange.start.year,
+          monthRange.end.month,
+          monthRange.end.year
+        );
       });
     }
     
@@ -298,8 +298,6 @@ export default function Clients() {
       'todo': 'secondary',
       'in-progress': 'default',
       'done': 'default',
-      'waiting': 'secondary',
-      'blocked': 'destructive',
     };
     return colors[status as keyof typeof colors] || 'secondary';
   };
@@ -330,7 +328,7 @@ export default function Clients() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                 <MonthRangeFilter value={monthRange} onChange={setMonthRange} />
+                 <MonthRangeFilter value={monthRange} onChange={setMonthRange} defaultPreset="all-time" />
                  <Button
                    variant="outline"
                    size="sm"

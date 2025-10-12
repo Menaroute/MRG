@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, CheckCircle2, Clock, AlertCircle, Filter, ChevronDown, X, RotateCcw } from 'lucide-react';
+import { Briefcase, CheckCircle2, Clock, AlertCircle, Filter, ChevronDown, X, RotateCcw, ListTodo } from 'lucide-react';
 import { STATUS_LABELS, WorkStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { useSessionStorage } from '@/hooks/use-session-storage';
 import MonthRangeFilter from '@/components/MonthRangeFilter';
 import { supabase } from '@/integrations/supabase/client';
+import { isClientRelevantForMonthRange } from '@/utils/periodicity';
 
 interface MonthRange {
   start: { month: number; year: number };
@@ -37,18 +38,56 @@ export default function AdminDashboard() {
   ];
 
   const getCheckboxValues = (columnType: string) => {
+    const activeFilters = dashboardFilters.activeFilters || [];
+    
+    // Get active filters of the OTHER type (for cascading)
+    const otherFilters = activeFilters.filter(f => !f.startsWith(`${columnType}:`));
+    
+    // Apply filters to get the relevant subset of clients
+    let relevantClients = clients;
+    if (otherFilters.length > 0) {
+      const filtersByType = otherFilters.reduce((acc, filter) => {
+        const [type] = filter.split(':');
+        if (!acc[type]) acc[type] = [];
+        acc[type].push(filter);
+        return acc;
+      }, {} as Record<string, string[]>);
+      
+      relevantClients = clients.filter(c => {
+        return Object.entries(filtersByType).every(([type, filters]) => {
+          return filters.some(filter => {
+            const parts = filter.split(':');
+            const value = parts[1];
+            
+            if (type === 'assigned') {
+              if (value === 'unassigned') {
+                return !c.assigned_user_id;
+              }
+              return c.assigned_user_id === value;
+            }
+            
+            if (type === 'client') {
+              return c.name === value;
+            }
+            
+            return true;
+          });
+        });
+      });
+    }
+    
     switch (columnType) {
       case 'assigned':
-        const assignedUsers = [...new Set(clients.map(c => c.assigned_user_id).filter(Boolean))];
+        const assignedUsers = [...new Set(relevantClients.map(c => c.assigned_user_id).filter(Boolean))];
         return [
           ...assignedUsers.map(userId => ({ 
             value: userId, 
             label: profiles.find(u => u.id === userId)?.name || 'Utilisateur inconnu'
           })),
-          { value: 'unassigned', label: 'Non assigné' },
+          ...(relevantClients.some(c => !c.assigned_user_id) ? [{ value: 'unassigned', label: 'Non assigné' }] : []),
         ];
       case 'client':
-        const clientNames = [...new Set(clients.map(c => c.name).filter(Boolean))].sort();
+        const clientNames = [...new Set(relevantClients.map(c => c.name).filter(Boolean))].sort();
         return clientNames.map(name => ({ 
           value: name, 
           label: name
@@ -104,22 +143,18 @@ export default function AdminDashboard() {
   const filteredClients = useMemo(() => {
     const activeFilters = dashboardFilters.activeFilters || [];
     
-    // First apply month range filter
+    // First apply month range filter based on periodicity
     let filtered = clients;
     if (monthRange) {
       filtered = clients.filter(c => {
-        // Check if client has activity within the selected date range
-        const updatedDate = new Date(c.updated_at);
-        const updatedMonth = updatedDate.getMonth() + 1; // 1-12
-        const updatedYear = updatedDate.getFullYear();
-        
-        // Create date objects for comparison
-        const clientDate = new Date(updatedYear, updatedMonth - 1);
-        const startDate = new Date(monthRange.start.year, monthRange.start.month - 1);
-        const endDate = new Date(monthRange.end.year, monthRange.end.month - 1);
-        
-        // Check if client's update date falls within the range
-        return clientDate >= startDate && clientDate <= endDate;
+        // Check if client is relevant for the selected month range based on its periodicity
+        return isClientRelevantForMonthRange(
+          c,
+          monthRange.start.month,
+          monthRange.start.year,
+          monthRange.end.month,
+          monthRange.end.year
+        );
       });
     }
     
@@ -162,9 +197,9 @@ export default function AdminDashboard() {
   }, [clients, dashboardFilters.activeFilters, monthRange]);
 
   const totalClients = filteredClients.length;
+  const todoClients = filteredClients.filter((c) => c.status === 'todo').length;
   const doneClients = filteredClients.filter((c) => c.status === 'done').length;
   const inProgressClients = filteredClients.filter((c) => c.status === 'in-progress').length;
-  const blockedClients = filteredClients.filter((c) => c.status === 'blocked').length;
 
   // Status distribution data (based on filtered clients)
   const statusData = Object.entries(
@@ -300,9 +335,9 @@ export default function AdminDashboard() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard title="Total Clients" value={totalClients} icon={Briefcase} change={2.5} />
-          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} />
+          <StatsCard title="À faire" value={todoClients} icon={ListTodo} change={0} />
           <StatsCard title="En cours" value={inProgressClients} icon={Clock} change={-0.2} />
-          <StatsCard title="Bloqués" value={blockedClients} icon={AlertCircle} change={0.1} />
+          <StatsCard title="Terminés" value={doneClients} icon={CheckCircle2} change={0.6} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">

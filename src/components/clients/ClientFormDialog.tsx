@@ -20,8 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { WorkStatus, STATUS_LABELS, PeriodicityType, PERIODICITY_LABELS, MONTH_LABELS } from '@/types';
-import { Client } from '@/contexts/DataContext';
+import { WorkStatus, STATUS_LABELS, PeriodicityType, PERIODICITY_LABELS, MONTH_LABELS, Client } from '@/types';
 import { getDefaultMonths, getRequiredMonthCount, validateMonthSelection } from '@/utils/periodicity';
 
 interface ClientFormDialogProps {
@@ -50,26 +49,28 @@ export default function ClientFormDialog({ open, onClose, client }: ClientFormDi
   const regularUsers = profiles.filter((u) => u.role === 'user' || u.role === 'admin');
 
   useEffect(() => {
-    if (client) {
-      reset({
-        name: client.name,
-        description: client.description || '',
-        status: client.status,
-        assigned_user_id: client.assigned_user_id,
-        periodicity: client.periodicity || 'monthly',
-      });
-      setSelectedMonths(client.periodicity_months || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-    } else {
-      reset({
-        name: '',
-        description: '',
-        status: 'todo',
-        assigned_user_id: profiles[0]?.id || '',
-        periodicity: 'monthly',
-      });
-      setSelectedMonths([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    if (open) {
+      if (client) {
+        reset({
+          name: client.name,
+          description: client.description || '',
+          status: client.status,
+          assigned_user_id: client.assigned_user_id,
+          periodicity: client.periodicity || 'monthly',
+        });
+        setSelectedMonths(client.periodicity_months || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      } else {
+        reset({
+          name: '',
+          description: '',
+          status: 'todo',
+          assigned_user_id: profiles[0]?.id || '',
+          periodicity: 'monthly',
+        });
+        setSelectedMonths([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      }
     }
-  }, [client, reset, profiles.length]);
+  }, [open, client, reset, profiles]);
 
   // Update selected months when periodicity changes
   useEffect(() => {

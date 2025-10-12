@@ -28,12 +28,13 @@ interface MonthRange {
 interface MonthRangeFilterProps {
   value: MonthRange | null;
   onChange: (range: MonthRange | null) => void;
+  defaultPreset?: PresetValue;
 }
 
 type PresetValue = 'this-month' | 'this-quarter' | 'this-year' | 'last-month' | 'last-quarter' | 'last-year' | 'all-time' | 'custom';
 
-export default function MonthRangeFilter({ value, onChange }: MonthRangeFilterProps) {
-  const [selectedPreset, setSelectedPreset] = useState<PresetValue>('this-month');
+export default function MonthRangeFilter({ value, onChange, defaultPreset = 'this-month' }: MonthRangeFilterProps) {
+  const [selectedPreset, setSelectedPreset] = useState<PresetValue>(defaultPreset);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedStartMonth, setSelectedStartMonth] = useState<{ month: number; year: number } | null>(null);
   const [selectedEndMonth, setSelectedEndMonth] = useState<{ month: number; year: number } | null>(null);
@@ -202,7 +203,7 @@ export default function MonthRangeFilter({ value, onChange }: MonthRangeFilterPr
   // Set initial value on mount
   useEffect(() => {
     if (!value) {
-      const initialRange = getPresetRange('this-month');
+      const initialRange = getPresetRange(defaultPreset);
       onChange(initialRange);
       setTempValue(initialRange);
     } else {

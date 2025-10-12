@@ -101,27 +101,61 @@ export default function History() {
   };
 
   const getCheckboxValues = (columnType: string) => {
+    const activeFilters = historyFilters.activeFilters || [];
+    
+    // Get active filters of the OTHER type (for cascading)
+    const otherFilters = activeFilters.filter(f => !f.startsWith(`${columnType}:`));
+    
+    // Apply filters to get the relevant subset of history
+    let relevantHistory = history;
+    if (otherFilters.length > 0) {
+      const filtersByType = otherFilters.reduce((acc, filter) => {
+        const [type] = filter.split(':');
+        if (!acc[type]) acc[type] = [];
+        acc[type].push(filter);
+        return acc;
+      }, {} as Record<string, string[]>);
+      
+      relevantHistory = history.filter(h => {
+        return Object.entries(filtersByType).every(([type, filters]) => {
+          return filters.some(filter => {
+            const parts = filter.split(':');
+            const value = parts[1];
+            
+            if (type === 'assigned') {
+              return h.user_id === value;
+            }
+            if (type === 'client') {
+              return h.client_name === value;
+            }
+            
+            return true;
+          });
+        });
+      });
+    }
+    
     switch (columnType) {
       case 'assigned':
-        const assignedUsers = [...new Set(history.map(h => h.user_id).filter(Boolean))];
+        const assignedUsers = [...new Set(relevantHistory.map(h => h.user_id).filter(Boolean))];
         return assignedUsers.map(userId => ({ 
           value: userId, 
           label: profiles.find(u => u.id === userId)?.name || 'Utilisateur inconnu'
         }));
       case 'client':
-        const clientNames = [...new Set(history.map(h => h.client_name).filter(Boolean))].sort();
+        const clientNames = [...new Set(relevantHistory.map(h => h.client_name).filter(Boolean))].sort();
         return clientNames.map(name => ({ 
           value: name, 
           label: name || 'Client inconnu'
         }));
       case 'oldStatus':
-        const oldStatuses = [...new Set(history.map(h => h.old_status).filter(Boolean))];
+        const oldStatuses = [...new Set(relevantHistory.map(h => h.old_status).filter(Boolean))];
         return oldStatuses.map(status => ({
           value: status as string,
           label: STATUS_LABELS[status as WorkStatus]
         }));
       case 'newStatus':
-        const newStatuses = [...new Set(history.map(h => h.new_status).filter(Boolean))];
+        const newStatuses = [...new Set(relevantHistory.map(h => h.new_status).filter(Boolean))];
         return newStatuses.map(status => ({
           value: status,
           label: STATUS_LABELS[status as WorkStatus]
@@ -267,8 +301,6 @@ export default function History() {
         return 'default';
       case 'in-progress':
         return 'secondary';
-      case 'blocked':
-        return 'destructive';
       default:
         return 'outline';
     }

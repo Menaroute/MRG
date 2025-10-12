@@ -39,6 +39,12 @@ export function isClientVisibleInCurrentPeriod(client: Client, isAdmin: boolean 
     return true;
   }
 
+  // Check if periodicity_months exists and is an array
+  if (!client.periodicity_months || !Array.isArray(client.periodicity_months)) {
+    console.warn(`Client ${client.id} has invalid periodicity_months:`, client.periodicity_months);
+    return false;
+  }
+
   // Check if current month is in the client's periodicity months
   return client.periodicity_months.includes(currentMonth);
 }
@@ -83,7 +89,7 @@ export function validateMonthSelection(periodicity: PeriodicityType, months: num
   
   if (periodicity === 'monthly') {
     // Monthly should have all 12 months
-    return months.length === 12 && months.sort().join(',') === '1,2,3,4,5,6,7,8,9,10,11,12';
+    return months.length === 12 && months.sort((a, b) => a - b).join(',') === '1,2,3,4,5,6,7,8,9,10,11,12';
   }
   
   // Other periodicities should have exactly the required number of unique months
@@ -122,5 +128,46 @@ export function shouldResetStatus(
   currentPeriodKey: string
 ): boolean {
   return lastPeriodKey !== null && lastPeriodKey !== currentPeriodKey;
+}
+
+/**
+ * Check if a client is relevant for a given month range based on its periodicity
+ */
+export function isClientRelevantForMonthRange(
+  client: Client,
+  startMonth: number,
+  startYear: number,
+  endMonth: number,
+  endYear: number
+): boolean {
+  // Monthly clients are relevant for any month range
+  if (client.periodicity === 'monthly') {
+    return true;
+  }
+
+  // Check if periodicity_months exists and is valid
+  if (!client.periodicity_months || !Array.isArray(client.periodicity_months)) {
+    return false;
+  }
+
+  // Create an array of all months in the range
+  const monthsInRange: number[] = [];
+  let currentYear = startYear;
+  let currentMonth = startMonth;
+
+  while (
+    currentYear < endYear || 
+    (currentYear === endYear && currentMonth <= endMonth)
+  ) {
+    monthsInRange.push(currentMonth);
+    currentMonth++;
+    if (currentMonth > 12) {
+      currentMonth = 1;
+      currentYear++;
+    }
+  }
+
+  // Check if any of the client's periodicity months are in the range
+  return client.periodicity_months.some(month => monthsInRange.includes(month));
 }
 

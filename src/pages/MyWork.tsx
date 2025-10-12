@@ -10,17 +10,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_LABELS } from '@/types';
+import { STATUS_LABELS, WorkStatus } from '@/types';
 import { toast } from 'sonner';
 import { Briefcase } from 'lucide-react';
-
-type WorkStatus = 'todo' | 'in-progress' | 'done' | 'waiting' | 'blocked';
+import { isClientVisibleInCurrentPeriod } from '@/utils/periodicity';
+import { usePeriodReset } from '@/hooks/use-period-reset';
 
 export default function MyWork() {
   const { user } = useAuth();
   const { clients, updateClient } = useData();
 
-  const myClients = user ? clients.filter(c => c.assigned_user_id === user.id) : [];
+  // Check and reset periods for assigned clients
+  usePeriodReset(clients.filter(c => c.assigned_user_id === user?.id), user?.id);
+
+  // Filter clients to show only those assigned to user and visible in current period
+  const myClients = user 
+    ? clients.filter(c => 
+        c.assigned_user_id === user.id && 
+        isClientVisibleInCurrentPeriod(c, false) // Users only see clients in their period
+      ) 
+    : [];
 
   const handleStatusChange = async (clientId: string, newStatus: WorkStatus) => {
     await updateClient(clientId, { status: newStatus });
@@ -31,8 +40,6 @@ export default function MyWork() {
       'todo': 'secondary',
       'in-progress': 'default',
       'done': 'default',
-      'waiting': 'secondary',
-      'blocked': 'destructive',
     };
     return colors[status as keyof typeof colors] || 'secondary';
   };
